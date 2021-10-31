@@ -1,0 +1,9 @@
+[submodule "repos/matcha-gtk-theme"]
+	path = repos/matcha-gtk-theme
+	url = https://github.com/vinceliuice/Matcha-gtk-theme.git
+[submodule "repos/dotfiles"]
+	path = repos/dotfiles
+	url = https://github.com/NickCrew/dotfiles.git
+[submodule "repos/gogh"]
+	path = repos/gogh
+	url = https://github.com/Mayccoll/Gogh.git

@@ -1,0 +1,189 @@
+---
+- name: "Workspace Gnome Configuration"
+  hosts: localhost
+  connection: local
+
+  tasks:
+
+
+    - name: Create Directories
+      block:
+
+        - name: Create ~/src
+          ansible.builtin.file:
+            path: "/home/{{ ansible_user }}/src"
+            state: directory
+            owner: "{{ ansible_user }}"
+            group: "{{ ansible_user }}"
+            mode: 0755
+          tags:
+            - files
+
+        - name: Create ~/AppImages
+          ansible.builtin.file:
+            path: "/home/{{ ansible_user }}/AppImages"
+            state: directory
+            owner: "{{ ansible_user }}"
+            group: "{{ ansible_user }}"
+            mode: 0755
+          notify: 
+            - Install Pling Store
+            - Install Pling Store Desktop File
+          tags:
+            - packages
+            - appimages
+            - files
+
+        - name: Create ~/.fonts
+          ansible.builtin.file:
+            path: "/home/{{ ansible_user }}/.fonts"
+            state: directory
+            owner: "{{ ansible_user }}"
+            group: "{{ ansible_user }}"
+            mode: 0755
+          notify:
+            - Install Fonts
+          tags:
+            - files
+            - ui
+            - fonts
+
+
+    - name: Clone Repos
+      block:
+
+        - name: Clone gogh terminal theme repo
+          ansible.builtin.git:
+            repo: https://github.com/Mayccoll/Gogh.git
+            dest: "/home/{{ ansible_user }}/src/gogh"
+            version: master
+          notify:
+            - Install Terminal Themes
+          tags:
+            - repos
+            - ui
+            - gnome
+    
+        - name: Clone Matcha-gtk-theme repo
+          ansible.builtin.git:
+            repo: https://github.com/vinceliuce/Matcha-gtk-theme.git
+            dest: "/home/{{ ansible_user }}/src/Matcha-gtk-theme"
+            version: master
+          notify:
+            - Install Matcha Theme
+          tags:
+            - repos
+            - ui
+            - gnome
+    
+
+    - name: Gnome Settings
+      block:
+
+        - name: Install dconf command line
+          ansible.builtin.packages:
+            name:
+              - dconf-cli
+              - uuid-runtime
+            state: present
+          become: true
+          tags:
+            - packages
+            - ui
+            - gnome
+     
+        - name: Enable the NightLight      
+          community.general.dconf:
+            key: /org/gnome/settings-daemon/plugins/color/night-light-enabled
+            value: yes
+            state: present
+          tags:
+            - gsettings
+            - color
+    
+        - name: Power Setting: Idle Dim
+          community.general.dconf:
+            key: /org/gnome/settings-daemon/plugins/power/idle-brightness
+            value: 30
+            state: present
+          tags:
+            - gsettings
+            - power
+    
+        - name: Set time until sleep for battery
+          community.general.dconf:
+            key: /org/gnome/settings-daemon/plugins/power/sleep-inactive-battery-time
+            value: 1200
+            state: present
+          tags:
+            - gsettings
+            - power
+
+
+  handlers:
+
+    - name: Install Pling Store
+      ansible.builtin.copy:
+        src: pling-store.AppImage
+        dest: "/home/{{ ansible_user }}/AppImages/pling-store.AppImage"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: 0775
+      tags:
+        - packages
+        - ui
+        - appimages
+
+    - name: Install Pling Store Desktop File
+      ansible.builtin.template:
+        src: pling-store.desktop.j2
+        dest: "/home/{{ ansible_user }}/.local/share/applications/pling-store.desktop"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: 0775
+        backup: no
+      tags:
+        - ui
+        - appimages
+        - desktop
+
+    - name: Install Fonts
+      ansible.builtin.copy:
+        src: fonts/
+        dest: "/home/{{ ansible_user }}/.fonts/"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: 0640
+      ignore_errors: yes
+      tags:
+        - ui
+        - files
+        - fonts
+
+    - name: Install Matcha Theme
+      ansible.builtin.shell: ./install.sh
+      args:
+        chdir: "/home/{{ ansible_user }}/src/Matcha-gtk-theme"
+        executable: /usr/bin/bash
+        creates: "/home/{{ ansible_user }}/.themes/Matcha-dark-azul"
+      tags:
+        - ui
+        - gnome
+        - themes
+
+    - name: Install Terminal Themes
+      ansible.builtin.shell: |
+        export TERMINAL=gnome-terminal 
+        ./tokyo-night-storm.sh
+        ./tokyo-night.sh
+        ./gruvbox-dark.sh
+        ./gruvbox.sh
+      args:
+        chdir: "/home/{{ ansible_user }}/src/gogh/themes"
+        executable: /usr/bin/bash
+      tags:
+        - ui
+        - gnome
+        - terminal
+    
+

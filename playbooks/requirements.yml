@@ -1,0 +1,6 @@
+---
+roles:
+  - fubarhouse.rust
+  - fubarhouse.golang
+collections:
+  - community.general

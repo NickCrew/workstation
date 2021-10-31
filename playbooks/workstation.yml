@@ -1,0 +1,237 @@
+---
+- name: "Manage Workstation"
+  hosts: localhost
+  connection: local
+
+  vars:
+    cargo_items: 
+      - zoxide
+      - exa
+      - mcfly
+      - lolcate
+
+  roles:
+    - fubarhouse.rust
+    - fubarhouse.golang
+
+  tasks:
+
+    - name: Install dnf plugins
+      ansible.builtin.package:
+        name:
+          - dnf-plugins-core
+        state: present
+      become: yes
+      tags:
+        - packages
+        - dnf
+
+    - name: Enable NVIDIA Auto Installer Repo
+      community.general.copr:
+        name: t0xic0der/nvidia-auto-installer-for-fedora
+        state: enabled
+      become: yes
+      tags:
+        - packages
+        - nvidia
+        - drivers
+
+    - name: Install nvautoinstall
+      ansible.builtin.package:
+        name:
+          - nvautoinstall
+        state: present
+      become: yes
+      notify:
+        - Install NVIDIA Drivers
+      tags:
+        - packages
+        - nvidia
+        - drivers
+
+    - name: Install Virtualization
+      ansible.builtin.package:
+        name:
+          - libvirt-client
+          - qemu-kvm
+          - libvirt-daemon-driver-network
+          - libvirt-daemon-config-network
+        state: present
+      become: yes
+      notify:
+        - Start libvirtd.service 
+      tags:
+        - packages
+        - virtualization
+
+    - name: Install podman
+      ansible.builtin.package:
+        name:
+          - podman
+        state: present
+      become: yes
+      tags:
+        - packages
+        - virtualization
+        - containers
+        - devtools
+
+    - name: Install Vagrant
+      ansible.builtin.package:
+        name: vagrant
+        state: present
+      become: yes
+      tags:
+        - packages
+        - virtualization
+
+    - name: Install Storage Tools
+      ansible.builtin.package:
+        name:
+          - autofs
+      become: yes
+      notify:
+        - Start autofs.service
+      tags:
+        - packages
+        - storage
+
+    - name: Install Utilities
+      ansible.builtin.package:
+        name:
+          - zsh
+          - ripgrep
+          - tldr
+          - socat
+          - ranger
+          - w3m
+          - lynx
+          - elinks
+          - lm_sensors
+          - sysstat
+          - python3-tmuxp
+          - python3-howdoi
+          - ulauncher
+      become: yes
+      tags:
+        - packages
+        - utilities
+
+   - name: Install build tools
+      ansible.builtin.package:
+        name:
+          - libevent-devel
+          - ncurses-devel
+          - autoconf
+          - automake
+          - pkg-config
+      become: yes
+      tags:
+        - packages
+        - buildtools
+
+    - name: Install Admin Tools
+      ansible.builtin.packages:
+        name:
+          - snapper
+          - python3-dnf-plugin-snapper
+      become: yes
+      notify:
+        - Configure Snapper
+      tags:
+        - packages
+        - storage
+
+    - name: Manage flathub Repository
+        community.general.flatpak_remote:
+          name: flathub
+          state: present
+          flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
+          method: system
+        become: yes
+        tags:
+          - packages
+          - flatpak
+
+    - name: Install Flatpak Packages
+      community.general.flatpak:
+        name:
+          - Obsidian
+          - Zoom
+          - Insomnia
+          - Postman
+          - Shotwell
+          - Liferea
+          - Discord
+          - Element
+          - SynologyDrive
+        state: present
+      become: yes
+      tags:
+        - packages
+        - flatpak
+        - utilities
+
+    - name: Install Unifi VPN Utilities
+      ansible.builtin.package:
+        name:
+          - xl2tpd
+          - NetworkManager-l2tp
+          - NetworkManager-l2tp-gnome
+      become: yes
+      tags:
+        - packages
+        - network
+
+  handlers:
+
+    - name: Start autofs.service
+      ansible.builtin.service:
+        name: autofs.service
+        state: started
+        enabled: yes
+      become: yes
+      tags:
+        - services
+        - storage
+
+    - name: Start libvirtd.service
+      ansible.builtin.service:
+        name: libvirtd.service
+        state: started
+        enabled: yes
+      become: yes
+      tags:
+        - services
+        - virtualization
+
+    - name: Configure Snapper
+      ansible.builtin.template:
+        src: snapper.config.root.j2
+        dest: /etc/snapper/configs/root
+        owner: root
+        group: root
+        mode: 0640
+        backup: yes
+      become: yes
+      tags:
+        - snapper
+        - config
+
+   - name: Install NVIDIA Drivers
+      ansible.builtin.shell: |
+        nvautoinstall --rpmadd
+        nvautoinstall --driver
+        nvautoinstall --nvrepo
+        nvautoinstall --plcuda
+        nvautoinstall --x86lib
+        nvautoinstall --ffmpeg
+        nvautoinstall --vulkan
+      args:
+        executable: /usr/bin/bash
+      become: yes
+      tags:
+        - packages
+        - nvidia
+        - drivers
+
