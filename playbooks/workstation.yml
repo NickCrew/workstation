@@ -73,8 +73,6 @@
       tags:
         - packages
         - virtualization
-        - containers
-        - devtools
 
     - name: Install Vagrant
       ansible.builtin.package:
