@@ -18,8 +18,19 @@ __Operating System:__ [Fedora Workstation 34](https://getfedora.org)
 
 __Manual:__ [XPS 15 7590 Setup and Specifications](https://www.dell.com/support/manuals/en-us/xps-15-7590-laptop/xps-15-7590-setup-and-specifications/xps-15-7590-setup-and-specifications?guid=guid-5b8de7b7-879f-45a4-88e0-732155904029&lang=en-us)  
 
-## Usage
+## Prerequisites
 
+1. Adminstrator (`sudo`) access by your user is required
+
+## Quick Start
+
+Restore dependencies and run all playbooks:
+
+````bash
+sh run.sh
+````
+
+## Usage
 
 ### Dependencies
 
@@ -39,10 +50,12 @@ Some files like fonts, static configuration files, or binary archives are includ
 
 Use the playbook variables to customize any of the templates from `playbooks/templates/`.  
 
-### Workstation Playbook
+### Packages Playbook
+
+Install all required packages (from multiple package managers) and start+enable any services.
 
 ````bash
-ansible-playbook playbooks/workstation.yml
+ansible-playbook playbooks/packages.yml
 ````
 
 > If this is your first run of the playbook, you will want to reboot afterwards.
@@ -60,7 +73,8 @@ There are some tags used to categorize and filter the tasks.
 
 ### Gnome UI Playbook
 
-Gnome settings, including themes, fonts, and other UI configurations, have been separated into the `gnome.yml` playbook: 
+Apply GNOME settings, including themes, fonts, and other UI configurations. 
+
 ````bash
 ansible-playbook playbooks/gnome.yml
 ````
