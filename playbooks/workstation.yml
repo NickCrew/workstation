@@ -1,8 +1,6 @@
 ---
 - hosts: localhost
 
-- name: Setup Base Workstation
-  import_playbook: workstation.yml
 
 - name: Configure User Interface (GNOME)
   import_playbook: gnome.yml

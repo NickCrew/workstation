@@ -1,0 +1,31 @@
+---
+# Install packages using pip (python) package manager
+- name: "Install Workstation Python Packages"
+  hosts: localhost
+  connection: local
+
+  tasks:
+
+    - name: "Install Ulauncher Python Package Dependencies"
+      ansible.builtin.pip:
+        name:
+          - cloudflare
+          - fuzzywuzzy
+          - docker
+          - dateparser
+          - jinja2
+          - frontmatter
+          - fuzzywuzzy
+      tags:
+        - packages
+        - ulauncher
+
+    - name: "Install ZSH Plugin Python Dependencies"
+      ansible.builtin.pip:
+        name:
+          - pyfunky
+      tags:
+        - packages
+        - zsh
+
+

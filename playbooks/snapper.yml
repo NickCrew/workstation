@@ -1,0 +1,52 @@
+---
+- name: "Setup Workstation Storage"
+  hosts: localhost
+  connection: local
+
+  tasks:
+
+    - name: Install Snapper
+      ansible.builtin.packages:
+        name:
+          - snapper
+          - snap-sync
+          - python3-dnf-plugin-snapper
+      become: yes
+      notify:
+        - Snapper Root Config
+        - Snapper Home Config
+      tags:
+        - packages
+        - storage
+
+
+
+  handlers:
+
+    - name: Snapper Home Config
+      ansible.builtin.template:
+        src: snapper.config.home.j2
+        dest: /etc/snapper/configs/home
+        owner: root
+        group: root
+        mode: 0640
+        backup: yes
+      become: yes
+      tags:
+        - snapper
+        - config
+
+    - name: Snapper Root Config
+      ansible.builtin.template:
+        src: snapper.config.root.j2
+        dest: /etc/snapper/configs/root
+        owner: root
+        group: root
+        mode: 0640
+        backup: yes
+      become: yes
+      tags:
+        - snapper
+        - config
+
+

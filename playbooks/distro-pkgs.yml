@@ -1,0 +1,124 @@
+---
+- name: "Install Core Workstation Packages"
+  hosts: localhost
+  connection: local
+
+  tasks:
+
+    - name: Install Virtualization
+      ansible.builtin.package:
+        name:
+          - libvirt-client
+          - qemu-kvm
+          - libvirt-daemon-driver-network
+          - libvirt-daemon-config-network
+        state: present
+      become: yes
+      notify:
+        - Start libvirtd.service 
+      tags:
+        - packages
+        - system
+        - virtualization
+
+    - name: Install podman
+      ansible.builtin.package:
+        name:
+          - podman
+        state: present
+      become: yes
+      tags:
+        - packages
+        - virtualization
+
+    - name: Install Vagrant
+      ansible.builtin.package:
+        name: vagrant
+        state: present
+      become: yes
+      tags:
+        - packages
+        - virtualization
+
+    - name: Install Utilities
+      ansible.builtin.package:
+        name:
+          - zsh
+          - ripgrep
+          - tldr
+          - socat
+          - ranger
+          - w3m
+          - lynx
+          - elinks
+          - lm_sensors
+          - sysstat
+          - python3-tmuxp
+          - python3-howdoi
+          - ulauncher
+      become: yes
+      tags:
+        - packages
+        - utilities
+
+   - name: Install build tools
+      ansible.builtin.package:
+        name:
+          - libevent-devel
+          - ncurses-devel
+          - autoconf
+          - automake
+          - pkg-config
+      become: yes
+      tags:
+        - packages
+        - buildtools
+
+    - name: Install Unifi VPN Utilities
+      ansible.builtin.package:
+        name:
+          - xl2tpd
+          - NetworkManager-l2tp
+          - NetworkManager-l2tp-gnome
+      become: yes
+      tags:
+        - gnome
+        - packages
+        - network
+
+    - name: Install AutoFS
+      ansible.builtin.package:
+        name:
+          - autofs
+      become: yes
+      notify:
+        - Start autofs.service
+      tags:
+        - packages
+        - storage
+
+
+
+  handlers:
+
+    - name: Start autofs.service
+      ansible.builtin.service:
+        name: autofs.service
+        state: started
+        enabled: yes
+      become: yes
+      tags:
+        - services
+        - storage
+
+
+    - name: Start libvirtd.service
+      ansible.builtin.service:
+        name: libvirtd.service
+        state: started
+        enabled: yes
+      become: yes
+      tags:
+        - services
+        - virtualization
+

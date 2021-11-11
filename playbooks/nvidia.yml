@@ -1,0 +1,60 @@
+---
+# Install NVIDIA proprietary drivers on Fedora
+- name: "Install NVIDIA Drivers for Fedora Workstation"
+  hosts: localhost
+  connection: local
+
+  tasks:
+    - name: Install dnf plugins
+      ansible.builtin.package:
+        name:
+          - dnf-plugins-core
+        state: present
+      become: yes
+      tags:
+        - packages
+        - dnf
+
+    - name: Enable NVIDIA Auto Installer Repo
+      community.general.copr:
+        name: t0xic0der/nvidia-auto-installer-for-fedora
+        state: enabled
+      become: yes
+      tags:
+        - packages
+        - nvidia
+        - drivers
+
+    - name: Install nvautoinstall
+      ansible.builtin.package:
+        name:
+          - nvautoinstall
+        state: present
+      become: yes
+      notify:
+        - Install NVIDIA Drivers
+      tags:
+        - packages
+        - nvidia
+        - drivers
+
+
+  handlers:
+
+   - name: Install NVIDIA Drivers
+      ansible.builtin.shell: |
+        nvautoinstall --rpmadd
+        nvautoinstall --driver
+        nvautoinstall --nvrepo
+        nvautoinstall --plcuda
+        nvautoinstall --x86lib
+        nvautoinstall --ffmpeg
+        nvautoinstall --vulkan
+      args:
+        executable: /usr/bin/bash
+      become: yes
+      tags:
+        - packages
+        - nvidia
+        - drivers
+

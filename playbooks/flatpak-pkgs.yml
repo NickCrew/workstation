@@ -1,0 +1,34 @@
+---
+# Install Flatpak packages
+
+- name: Configure Flatpak Repos
+  import_playbook: flatpak-repos.yml
+
+- name: "Install Flatpak Packages for Fedora Workstation"
+  hosts: localhost
+  connection: local
+
+  tasks:
+
+    - name: Install Flatpak Packages
+      community.general.flatpak:
+        name:
+          - Obsidian
+          - Zoom
+          - Slack
+          - Insomnia
+          - Postman
+          - Shotwell
+          - Liferea
+          - Discord
+          - Element
+          - SynologyDrive
+          - Zeal
+        state: present
+      become: yes
+      tags:
+        - packages
+        - flatpak
+        - utilities
+
+

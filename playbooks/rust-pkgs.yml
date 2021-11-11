@@ -1,0 +1,16 @@
+---
+# Install packages using cargo (rust) package manager
+- name: "Workstation Rust Packages"
+  hosts: localhost
+  connection: local
+
+  cargo_items: 
+    - zoxide
+    - exa
+    - mcfly
+    - lolcate
+
+  roles:
+    - fubarhouse.rust
+
+ 
